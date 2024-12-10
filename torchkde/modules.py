@@ -85,7 +85,7 @@ class KernelDensity(nn.Module):
             # Apply the kernel function to each difference
             kernel_values = self.kernel_module(differences)
             # Sum kernel values and normalize
-            density = kernel_values.sum(-1) * (-1 / (self.bandwidth * X_neighbors.shape[0]))
+            density = kernel_values.sum(-1) / (self.bandwidth * X_neighbors.shape[0])
             # Compute the log-density
             log_density.append(density.log())
 
