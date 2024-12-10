@@ -24,7 +24,7 @@ class Distribution(ABC):
 
 
 class BartSimpsonDistribution(Distribution):
-    """Bart Simpson distribution, see https://www.stat.cmu.edu/~larry/=sml/densityestimation.pdf."""
+    """Bart Simpson distribution (aka the "claw"), see https://www.stat.cmu.edu/~larry/=sml/densityestimation.pdf."""
     def __init__(self):
         super(BartSimpsonDistribution, self).__init__()
         self.inv_cdf = self.compute_inv_cdf()
@@ -34,6 +34,9 @@ class BartSimpsonDistribution(Distribution):
         for i in range(0, 5):
             prob += (1/10) * Normal((i/2) - 1, 1/10).log_prob(x).exp()
         return prob
+    
+    def log_prob(self, x):
+        return self.prob(x).log()
     
     def sample(self, num_samples):
         """Uniform samples from the distribution."""

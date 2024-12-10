@@ -65,7 +65,6 @@ class KernelDensity(nn.Module):
         X : torch Tensor of shape (n_samples, n_features)
             An array of points to query.  Last dimension should match dimension
             of training data (n_features).
-
         Returns
         -------
         density : torch Tensor of shape (n_samples,)
@@ -78,7 +77,7 @@ class KernelDensity(nn.Module):
         X_neighbors = self.tree_.query(X, return_distance=False)
         # Compute log-density estimation with a kernel function
         log_density = []
-
+        # looping to avoid memory issues
         for x in X:
             # Compute pairwise differences between the current point and neighbors
             differences = x - X_neighbors
