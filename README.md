@@ -1,6 +1,6 @@
 # TorchKDE :fire:
 
-An open source differentiable implementation of kernel density estimation in PyTorch :fire: by Klaus-Rudolf Kladny. 
+An open source implementation of differentiable kernel density estimation in PyTorch by Klaus-Rudolf Kladny. 
 
 $$\hat{p}(x) = \frac{1}{hn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
 
