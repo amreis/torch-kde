@@ -19,7 +19,7 @@ GRID_N = 100
 GRID_RG = 100
 
 
-class KernelTestCase(unittest.TestCase):
+class KdeTestCase(unittest.TestCase):
     def test_integral(self):
         """Test that the kernel density estimator integrates to 1."""
         for kernel_str, bandwidth, dim in product(SUPPORTED_KERNELS, BANDWIDTHS, DIMS):
