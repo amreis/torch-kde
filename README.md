@@ -5,7 +5,7 @@
 
 A differentiable implementation of [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) in PyTorch by Klaus-Rudolf Kladny.
 
-$$\hat{f}(x) = \frac{1}{hn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
+$$\hat{f}(x) = \frac{1}{h^dn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
 
 ## What's included?
 
