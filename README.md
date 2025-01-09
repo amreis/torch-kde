@@ -21,13 +21,25 @@ Now you are ready to go!
 
 ### Kernel Density Estimation
 
-KernelDensity supports the same operations as the [KernelDensity class in scikit-learn](https://scikit-learn.org/dev/modules/generated/sklearn.neighbors.KernelDensity.html), but implemented in PyTorch:
+The `KernelDensity` class supports the same operations as the [KernelDensity class in scikit-learn](https://scikit-learn.org/dev/modules/generated/sklearn.neighbors.KernelDensity.html), but implemented in PyTorch and differentiable with respect to input data. Here is a little taste:
 
 ```python
 from torchkde import KernelDensity
+import torch
+
+multivariate_normal = torch.distributions.MultivariateNormal(torch.ones(2), torch.eye(2))
+X = multivariate_normal.sample((1000,)) # create data
+X.requires_grad = True # make differentiable
+kde = KernelDensity(bandwidth=1.0, kernel='gaussian') # create kde object
+_ = kde.fit(X) # fit kde to data
+
+X_new = multivariate_normal.sample((100,)) # create new data 
+logprob = kde.score_samples(X_new)
+
+logprob.grad_fn # is not None
 ```
 
-Check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson distribution](https://www.stat.cmu.edu/~larry/=sml/densityestimation.pdf), which yields the following density estimate:
+You may also check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson distribution](https://www.stat.cmu.edu/~larry/=sml/densityestimation.pdf), which yields the following density estimate:
 
 <p align="center">
 <img src="/plots/bart_simpson_kde.svg" width="500">
