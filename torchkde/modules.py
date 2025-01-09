@@ -3,15 +3,19 @@ from torch import nn
 
 from .utils import ensure_two_dimensional
 from .algorithms import RootTree, SUPPORTED_ALGORITHMS
-from .kernels import GaussianKernel, SUPPORTED_KERNELS
+from .kernels import GaussianKernel, EpanechnikovKernel, SUPPORTED_KERNELS
+
 
 ALG_DICT = {
     "standard": RootTree
     }
 
+
 KERNEL_DICT = {
-    "gaussian": GaussianKernel
+    "gaussian": GaussianKernel,
+    "epanechnikov": EpanechnikovKernel
 }
+
 
 class KernelDensity(nn.Module):
     """Roughly analagous to the KernelDensity class in sklearn.neighbors (see https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/neighbors/_kde.py)."""
@@ -28,6 +32,8 @@ class KernelDensity(nn.Module):
         self.kernel_module = KERNEL_DICT[kernel](bandwidth)
         self.algorithm = algorithm
         self.is_fitted = False
+        self.n_samples = None
+        self.n_features = None
 
         if algorithm not in SUPPORTED_ALGORITHMS:
             raise ValueError(f"Algorithm {algorithm} not supported")
@@ -53,6 +59,8 @@ class KernelDensity(nn.Module):
         """
 
         self.tree_ = ALG_DICT[self.algorithm]()
+        self.n_samples = X.shape[0]
+        self.n_features = X.shape[1]
         self.tree_.build(X)
         self.is_fitted = True
         return self
@@ -84,7 +92,7 @@ class KernelDensity(nn.Module):
             # Apply the kernel function to each difference
             kernel_values = self.kernel_module(differences)
             # Sum kernel values and normalize
-            density = kernel_values.sum(-1) / (self.bandwidth * X_neighbors.shape[0])
+            density = kernel_values.sum(-1) / ((self.bandwidth**self.n_features) * self.n_samples)
             # Compute the log-density
             log_density.append(density.log())
 
