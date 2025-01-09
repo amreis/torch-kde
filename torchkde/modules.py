@@ -34,6 +34,7 @@ class KernelDensity(nn.Module):
         self.is_fitted = False
         self.n_samples = None
         self.n_features = None
+        self.data = None
 
         if algorithm not in SUPPORTED_ALGORITHMS:
             raise ValueError(f"Algorithm {algorithm} not supported")
@@ -97,7 +98,7 @@ class KernelDensity(nn.Module):
             log_density.append(density.log())
 
         # Convert the list of log-density values into a tensor
-        log_density = torch.tensor(log_density)
+        log_density = torch.stack(log_density, dim=0)
         return log_density
 
 
