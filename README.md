@@ -47,7 +47,7 @@ You may also check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson d
 
 ## (Currently) Supported Settings
 
-The current implementation only provides basic functionality.
+The current implementation provides the following functionality:
 
 **Supported kernels**: Gaussian, Epanechnikov (sampling new data points is only supported for Gaussian).
 
