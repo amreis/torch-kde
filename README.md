@@ -61,9 +61,10 @@ In case you do not know how to do that, here are the necessary steps:
 
 1. Fork the repo
 2. Create your feature branch (`git checkout -b cool_tree_algorithm`)
-3. Commit your changes (`git commit -am 'Add cool tree algorithm'`)
-4. Push to the branch (`git push origin cool_tree_algorithm`)
-5. Open a Pull Request
+3. Run the unit tests (`python -m tests.test_kde`) and only proceed if the script outputs "OK".
+4. Commit your changes (`git commit -am 'Add cool tree algorithm'`)
+5. Push to the branch (`git push origin cool_tree_algorithm`)
+6. Open a Pull Request
 
 ## Issues?
 
