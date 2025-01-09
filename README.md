@@ -7,7 +7,7 @@ A differentiable implementation of [kernel density estimation](https://en.wikipe
 
 $$\hat{f}(x) = \frac{1}{h^dn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
 
-## Installation Instruction
+## Installation Instructions
 
 Clone the repository, cd into the root directory and run
 
