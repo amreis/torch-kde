@@ -27,7 +27,7 @@ Check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson distribution](
 
 The current implementation only provides basic functionality.
 
-**Supported kernels**: Gaussian.
+**Supported kernels**: Gaussian, Epanechnikov (sampling new data points is only supported for Gaussian).
 
 **Supported tree algorithms**: Standard (which corresponds to a simple root tree that returns the entire data set).
 

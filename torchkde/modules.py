@@ -134,7 +134,7 @@ class KernelDensity(nn.Module):
         """
         assert self.is_fitted, "Model must be fit before sampling."
 
-        if self.kernel not in SUPPORTED_KERNELS:
+        if self.kernel not in ["gaussian"]:
             raise NotImplementedError()
 
         data = torch.tensor(self.tree_.data)
