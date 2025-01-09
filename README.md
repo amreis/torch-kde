@@ -17,8 +17,11 @@ KernelDensity supports the same operations as the [KernelDensity class in scikit
 from torchkde import KernelDensity
 ```
 
-Check out `demo_kde.ipynb` for a simple demo.
+Check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson distribution](https://www.stat.cmu.edu/~larry/=sml/densityestimation.pdf), which yields the following density estimate:
 
+<p align="center">
+<img src="/plots/bart_simpson_kde.svg" width="400">
+</p>
 
 ## (Currently) Supported Settings
 
