@@ -1,5 +1,6 @@
 from torch import nn
 
+
 class KernelDensityRegularizer(nn.Module):
     """Module that computes the KDE of a set of points at a given grid."""
     def __init__(self, grid, bandwidth, kernel="gaussian"):
