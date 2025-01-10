@@ -16,7 +16,11 @@ Clone the repository, cd into the root directory and run
 pip install .
 ```
 
-Now you are ready to go!
+Now you are ready to go! If you would also like to run the code in the Jupyter notebooks or contribute to this package, please also install the packages in the `requirements.txt` (inside of an environment):
+
+```bash
+pip install -r requirements.txt
+```
 
 ## What's included?
 
