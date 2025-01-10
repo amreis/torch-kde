@@ -2,9 +2,11 @@
 
 from itertools import product
 from functools import partial
+import random
 import unittest
 
 import torch
+import numpy as np
 from torch.autograd import gradcheck
 
 from torchkde.kernels import *
@@ -20,6 +22,13 @@ GRID_RG = 100
 
 
 class KdeTestCase(unittest.TestCase):
+    def setUp(self):
+        torch.manual_seed(0)
+        random.seed(0)
+        np.random.seed(0)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
     def test_integral(self):
         """Test that the kernel density estimator integrates to 1."""
         for kernel_str, bandwidth, dim in product(SUPPORTED_KERNELS, BANDWIDTHS, DIMS):
@@ -43,7 +52,7 @@ class KdeTestCase(unittest.TestCase):
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} 
                             and bandwidth {str(bandwidth)} does not integrate to 1.""")
             
-    def test_diffble(self, bandwidth=torch.tensor(1.0)):
+    def test_diffble(self, bandwidth=torch.tensor(1.0), eps=1e-07):
         """Test that the kernel density estimator is differentiable."""
         for kernel_str, dim in product(SUPPORTED_KERNELS, DIMS):
             
@@ -62,7 +71,7 @@ class KdeTestCase(unittest.TestCase):
 
             # Check that the kernel density estimator is differentiable w.r.t. the training data
             fnc = partial(fit_and_eval, X_new=X_new, bandwidth=bandwidth)
-            self.assertTrue(gradcheck(lambda X_: fnc(X=X_), (X,), raise_exception=False), 
+            self.assertTrue(gradcheck(lambda X_: fnc(X=X_), (X,), raise_exception=False, eps=eps), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t training data.""")
             
             X.requires_grad = False
@@ -71,7 +80,7 @@ class KdeTestCase(unittest.TestCase):
 
             # Check that the kernel density estimator is differentiable w.r.t. the bandwidth
             fnc = partial(fit_and_eval, X=X, X_new=X_new)
-            self.assertTrue(gradcheck(lambda bandwidth_: fnc(bandwidth=bandwidth_), (bandwidth,), raise_exception=False), 
+            self.assertTrue(gradcheck(lambda bandwidth_: fnc(bandwidth=bandwidth_), (bandwidth,), raise_exception=False, eps=eps), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t. the bandwidth.""")
             
             X.requires_grad = False
@@ -80,7 +89,7 @@ class KdeTestCase(unittest.TestCase):
 
             # Check that the kernel density estimator is differentiable w.r.t. the evaluation data
             fnc = partial(fit_and_eval, X=X, bandwidth=bandwidth)
-            self.assertTrue(gradcheck(lambda X_new_: fnc(X_new=X_new_), (X_new,), raise_exception=False), 
+            self.assertTrue(gradcheck(lambda X_new_: fnc(X_new=X_new_), (X_new,), raise_exception=False, eps=eps), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t evaluation data.""")
             
 
@@ -93,7 +102,6 @@ def sample_from_gaussian(dim, N):
     multivariate_normal = torch.distributions.MultivariateNormal(mean, covariance_matrix)
     X = multivariate_normal.sample((N,))
     return X
-
 
 
 if __name__ == "__main__":
