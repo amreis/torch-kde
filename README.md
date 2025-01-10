@@ -45,7 +45,7 @@ You may also check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson d
 <img src="/plots/bart_simpson_kde.svg" width="500">
 </p>
 
-## (Currently) Supported Settings
+## Supported Settings
 
 The current implementation provides the following functionality:
 
