@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 
+
 SUPPORTED_ALGORITHMS = [
     "standard"
     #TODO: Add algorithms like KDTree and BallTree
 ]
+
 
 class Tree(ABC):
     def __init__(self):

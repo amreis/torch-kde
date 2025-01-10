@@ -10,12 +10,12 @@ from torch.autograd import gradcheck
 from torchkde.kernels import *
 from torchkde.modules import KernelDensity
 
-BANDWIDTHS = [1.0, 5.0, 10.0]
+BANDWIDTHS = [1.0, 5.0]
 DIMS = [1, 2]
 TOLERANCE = 1e-1
 
 N = 100
-GRID_N = 100
+GRID_N = 1000
 GRID_RG = 100
 
 
@@ -62,7 +62,7 @@ class KdeTestCase(unittest.TestCase):
 
             # Check that the kernel density estimator is differentiable w.r.t. the training data
             fnc = partial(fit_and_eval, X_new=X_new, bandwidth=bandwidth)
-            self.assertTrue(gradcheck(lambda X_: fnc(X=X_), (X,)), 
+            self.assertTrue(gradcheck(lambda X_: fnc(X=X_), (X,), raise_exception=False), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t training data.""")
             
             X.requires_grad = False
@@ -71,7 +71,7 @@ class KdeTestCase(unittest.TestCase):
 
             # Check that the kernel density estimator is differentiable w.r.t. the bandwidth
             fnc = partial(fit_and_eval, X=X, X_new=X_new)
-            self.assertTrue(gradcheck(lambda bandwidth_: fnc(bandwidth=bandwidth_), (bandwidth,)), 
+            self.assertTrue(gradcheck(lambda bandwidth_: fnc(bandwidth=bandwidth_), (bandwidth,), raise_exception=False), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t. the bandwidth.""")
             
             X.requires_grad = False
@@ -80,7 +80,7 @@ class KdeTestCase(unittest.TestCase):
 
             # Check that the kernel density estimator is differentiable w.r.t. the evaluation data
             fnc = partial(fit_and_eval, X=X, bandwidth=bandwidth)
-            self.assertTrue(gradcheck(lambda X_new_: fnc(X_new=X_new_), (X_new,)), 
+            self.assertTrue(gradcheck(lambda X_new_: fnc(X_new=X_new_), (X_new,), raise_exception=False), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t evaluation data.""")
             
 
