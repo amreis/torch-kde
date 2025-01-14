@@ -54,11 +54,15 @@ You may also check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson d
 
 The current implementation provides the following functionality:
 
-**Supported kernels**: Gaussian, Epanechnikov (sampling new data points is only supported for Gaussian).
+<div align="center">
 
-**Supported tree algorithms**: Standard (which corresponds to a simple root tree that returns the entire data set).
+| Feature                  | Supported Values            |
+|--------------------------|-----------------------------|
+| Kernels                  | Gaussian, Epanechnikov      |
+| Tree Algorithms          | Standard                    |
+| Bandwidths               | Float (Scott/Silverman unsupported) |
 
-**Supported bandwidths**: Only floats, bandwiths estimators such as scott or silverman are not supported.
+</div>
 
 ## Got an Extension? Create a Pull Request!
 
