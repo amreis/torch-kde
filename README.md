@@ -10,7 +10,7 @@ $$\hat{f}(x) = \frac{1}{h^dn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
 
 ## Installation Instructions
 
-Clone the repository, cd into the root directory and run
+Clone the repository, `cd` into the root directory and run
 
 ```bash
 pip install .
@@ -58,7 +58,7 @@ The current implementation provides the following functionality:
 
 **Supported tree algorithms**: Standard (which corresponds to a simple root tree that returns the entire data set).
 
-**Supported bandwidths**: Only floats, bandwiths estimators such as scott or silverman and are not supported.
+**Supported bandwidths**: Only floats, bandwiths estimators such as scott or silverman are not supported.
 
 ## Got an Extension? Create a Pull Request!
 
@@ -73,4 +73,4 @@ In case you do not know how to do that, here are the necessary steps:
 
 ## Issues?
 
-If you discover a bug or do not understand something, please let me know at *kkladny [at] tuebingen [dot] mpg [dot] de* and I will fix it!
+If you discover a bug or do not understand something, please create an issue or let me know directly at *kkladny [at] tuebingen [dot] mpg [dot] de*! I am also happy to take requests for implementing specific functionalities.
