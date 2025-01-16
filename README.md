@@ -3,6 +3,7 @@
 ![Python Version](https://img.shields.io/badge/python-3.11.11%2B-blue.svg)
 ![PyTorch Version](https://img.shields.io/badge/pytorch-2.5.1-brightgreen.svg)
 ![Tests](https://github.com/rudolfwilliam/torch-kde/actions/workflows/ci.yml/badge.svg)
+[![DOI](https://zenodo.org/badge/901331908.svg)](https://doi.org/10.5281/zenodo.14674657)
 
 A differentiable implementation of [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) in PyTorch by Klaus-Rudolf Kladny.
 
