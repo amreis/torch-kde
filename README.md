@@ -7,7 +7,7 @@
 
 A differentiable implementation of [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) in PyTorch by Klaus-Rudolf Kladny.
 
-$$\hat{f}(x) = \frac{1}{h^dn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
+$$\hat{f}(x) = \frac{1}{|H|^{\frac{1}{2}} n} \sum_{i=1}^n K \left( H^{-\frac{1}{2}} \left( x - x_i \right) \right)$$
 
 ## Installation Instructions
 
@@ -35,8 +35,8 @@ import torch
 
 multivariate_normal = torch.distributions.MultivariateNormal(torch.ones(2), torch.eye(2))
 X = multivariate_normal.sample((1000,)) # create data
-X.requires_grad = True # make differentiable
-kde = KernelDensity(bandwidth=1.0, kernel='gaussian') # create kde object
+X.requires_grad = True # enable differentiation
+kde = KernelDensity(bandwidth=1.0, kernel='gaussian') # create kde object with isotropic bandwidth matrix
 _ = kde.fit(X) # fit kde to data
 
 X_new = multivariate_normal.sample((100,)) # create new data 
@@ -61,7 +61,7 @@ The current implementation provides the following functionality:
 |--------------------------|-----------------------------|
 | Kernels                  | Gaussian, Epanechnikov      |
 | Tree Algorithms          | Standard                    |
-| Bandwidths               | Float (Scott/Silverman unsupported) |
+| Bandwidths               | Float (Isotropic bandwidth matrix), Scott, Silverman |
 
 </div>
 
@@ -79,3 +79,12 @@ In case you do not know how to do that, here are the necessary steps:
 ## Issues?
 
 If you discover a bug or do not understand something, please create an issue or let me know directly at *kkladny [at] tuebingen [dot] mpg [dot] de*! I am also happy to take requests for implementing specific functionalities.
+
+
+<div align="center">
+
+> "In God we trust. All others must bring data."
+> 
+> — W. Edwards Deming
+> 
+</div>

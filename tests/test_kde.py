@@ -11,8 +11,9 @@ from torch.autograd import gradcheck
 
 from torchkde.kernels import *
 from torchkde.modules import KernelDensity
+from torchkde.bandwidths import SUPPORTED_BANDWIDTHS
 
-BANDWIDTHS = [1.0, 5.0]
+BANDWIDTHS = [1.0, 5.0] + SUPPORTED_BANDWIDTHS
 DIMS = [1, 2]
 TOLERANCE = 1e-1
 
