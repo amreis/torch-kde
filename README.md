@@ -3,14 +3,15 @@
 ![Python Version](https://img.shields.io/badge/python-3.11.11%2B-blue.svg)
 ![PyTorch Version](https://img.shields.io/badge/pytorch-2.5.1-brightgreen.svg)
 ![Tests](https://github.com/rudolfwilliam/torch-kde/actions/workflows/ci.yml/badge.svg)
+[![DOI](https://zenodo.org/badge/901331908.svg)](https://doi.org/10.5281/zenodo.14674657)
 
 A differentiable implementation of [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) in PyTorch by Klaus-Rudolf Kladny.
 
-$$\hat{f}(x) = \frac{1}{h^dn} \sum_{i=1}^n K \left( \frac{x - x_i}{h} \right)$$
+$$\hat{f}(x) = \frac{1}{|H|^{\frac{1}{2}} n} \sum_{i=1}^n K \left( H^{-\frac{1}{2}} \left( x - x_i \right) \right)$$
 
 ## Installation Instructions
 
-Clone the repository, cd into the root directory and run
+Clone the repository, `cd` into the root directory and run
 
 ```bash
 pip install .
@@ -54,11 +55,15 @@ You may also check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson d
 
 The current implementation provides the following functionality:
 
-**Supported kernels**: Gaussian, Epanechnikov (sampling new data points is only supported for Gaussian).
+<div align="center">
 
-**Supported tree algorithms**: Standard (which corresponds to a simple root tree that returns the entire data set).
+| Feature                  | Supported Values            |
+|--------------------------|-----------------------------|
+| Kernels                  | Gaussian, Epanechnikov      |
+| Tree Algorithms          | Standard                    |
+| Bandwidths               | Float (Scott/Silverman unsupported) |
 
-**Supported bandwidths**: Only floats, bandwiths estimators such as scott or silverman and are not supported.
+</div>
 
 ## Got an Extension? Create a Pull Request!
 
@@ -73,4 +78,4 @@ In case you do not know how to do that, here are the necessary steps:
 
 ## Issues?
 
-If you discover a bug or do not understand something, please let me know at *kkladny [at] tuebingen [dot] mpg [dot] de* and I will fix it!
+If you discover a bug or do not understand something, please create an issue or let me know directly at *kkladny [at] tuebingen [dot] mpg [dot] de*! I am also happy to take requests for implementing specific functionalities.

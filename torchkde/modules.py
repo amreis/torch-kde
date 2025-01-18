@@ -1,8 +1,9 @@
 import torch
 from torch import nn
 
-from .utils import ensure_two_dimensional
+from .utils import ensure_two_dimensional, check_if_mat
 from .algorithms import RootTree, SUPPORTED_ALGORITHMS
+from .bandwidths import SUPPORTED_BANDWIDTHS, compute_bandwidth
 from .kernels import GaussianKernel, EpanechnikovKernel, SUPPORTED_KERNELS
 
 
@@ -18,7 +19,8 @@ KERNEL_DICT = {
 
 
 class KernelDensity(nn.Module):
-    """Roughly analagous to the KernelDensity class in sklearn.neighbors (see https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/neighbors/_kde.py)."""
+    """Analagon to the KernelDensity class in sklearn.neighbors 
+    (see https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/neighbors/_kde.py)."""
 
     def __init__(
         self,
@@ -29,7 +31,7 @@ class KernelDensity(nn.Module):
     ):
         self.bandwidth = bandwidth
         self.kernel = kernel
-        self.kernel_module = KERNEL_DICT[kernel](bandwidth)
+        self.kernel_module = KERNEL_DICT[kernel]()
         self.algorithm = algorithm
         self.is_fitted = False
         self.n_samples = None
@@ -41,8 +43,10 @@ class KernelDensity(nn.Module):
         
         if kernel not in SUPPORTED_KERNELS:
             raise ValueError(f"Kernel {kernel} not supported")
-        
-        # TODO: Add support for silverman and scott bandwidth selection
+
+        if not isinstance(bandwidth, (float, torch.Tensor)) and bandwidth not in SUPPORTED_BANDWIDTHS:
+            raise ValueError(f"Bandwidth {bandwidth} not supported")
+
 
     def fit(self, X):
         """Fit the Kernel Density model on the data.
@@ -63,6 +67,8 @@ class KernelDensity(nn.Module):
         self.n_samples = X.shape[0]
         self.n_features = X.shape[1]
         self.tree_.build(X)
+        self.bandwidth = compute_bandwidth(X, self.bandwidth)
+        self.kernel_module.bandwidth = self.bandwidth
         self.is_fitted = True
         return self
 
@@ -86,6 +92,8 @@ class KernelDensity(nn.Module):
         X_neighbors = self.tree_.query(X, return_distance=False)
         # Compute log-density estimation with a kernel function
         log_density = []
+        # Compute normalization part from bandwidth matrix
+        bw_norm = torch.sqrt(torch.det(self.bandwidth)) if check_if_mat(self.bandwidth) else self.bandwidth**(self.n_features/2)
         # looping to avoid memory issues
         for x in X:
             # Compute pairwise differences between the current point and neighbors
@@ -93,7 +101,7 @@ class KernelDensity(nn.Module):
             # Apply the kernel function to each difference
             kernel_values = self.kernel_module(differences)
             # Sum kernel values and normalize
-            density = kernel_values.sum(-1) / ((self.bandwidth**self.n_features) * self.n_samples)
+            density = kernel_values.sum(-1) / (bw_norm * self.n_samples)
             # Compute the log-density
             log_density.append(density.log())
 
@@ -141,7 +149,7 @@ class KernelDensity(nn.Module):
         data = torch.tensor(self.tree_.data)
         idxs = torch.randint(data.shape[0], (n_samples,))
 
-        X = torch.randn(n_samples, data.shape[1]) * self.bandwidth + data[idxs]
+        X = self.bandwidth * torch.randn(n_samples, data.shape[1]) + data[idxs]
 
         return ensure_two_dimensional(X)
     
