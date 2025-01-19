@@ -39,9 +39,13 @@ class Kernel(ABC):
 class GaussianKernel(Kernel):
     def __call__(self, x):
         super().__call__(x)
+        c = self._norm_constant(dim=x.shape[-1])
         u = kernel_input(self.inv_bandwidth, x)
-        return torch.exp(-u/2) / \
-                ((2 * math.pi)**(x.shape[-1]*0.5))
+        return c*torch.exp(-u/2)
+
+    def _norm_constant(self, dim):
+        # normalizing constant for the Gaussian kernel
+        return 1/(2*math.pi)**(dim/2)
 
 
 class EpanechnikovKernel(Kernel):
@@ -59,12 +63,13 @@ class EpanechnikovKernel(Kernel):
 class ExponentialKernel(Kernel):
     def __call__(self, x):
         super().__call__(x)
+        c = self._norm_constant(dim=x.shape[-1])
         u = kernel_input(self.inv_bandwidth, x, exp=1)
-        return torch.exp(-u)/2
+        return c*torch.exp(-u)
     
     def _norm_constant(self, dim):
-        # normalizing constant for the Epanechnikov
-        return ((dim + 2)*gamma(dim/2 + 1))/(2*math.pi**(dim/2))
+        # normalizing constant for the exponential kernel
+        return 1/(2**dim)
     
 
 def kernel_input(inv_bandwidth, x, exp=2):
