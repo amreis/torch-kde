@@ -59,7 +59,7 @@ The current implementation provides the following functionality:
 
 | Feature                  | Supported Values            |
 |--------------------------|-----------------------------|
-| Kernels                  | Gaussian, Epanechnikov      |
+| Kernels                  | Gaussian, Epanechnikov, Exponential      |
 | Tree Algorithms          | Standard                    |
 | Bandwidths               | Float (Isotropic bandwidth matrix), Scott, Silverman |
 

@@ -9,7 +9,8 @@ from torchkde.utils import check_if_mat, inverse_sqrt
 
 SUPPORTED_KERNELS = [
     "gaussian",
-    "epanechnikov"
+    "epanechnikov",
+    "exponential"
 ]
 
 
@@ -55,10 +56,27 @@ class EpanechnikovKernel(Kernel):
         return ((dim + 2)*gamma(dim/2 + 1))/(2*math.pi**(dim/2))
 
 
-def kernel_input(inv_bandwidth, x):
+class ExponentialKernel(Kernel):
+    def __call__(self, x):
+        super().__call__(x)
+        u = kernel_input(self.inv_bandwidth, x, exp=1)
+        return torch.exp(-u)/2
+    
+    def _norm_constant(self, dim):
+        # normalizing constant for the Epanechnikov
+        return ((dim + 2)*gamma(dim/2 + 1))/(2*math.pi**(dim/2))
+    
+
+def kernel_input(inv_bandwidth, x, exp=2):
     """Compute the input to the kernel function."""
-    if check_if_mat(inv_bandwidth):
-        return ((x @ inv_bandwidth)**2).sum(-1)
-    else:  # Scalar case
-        return ((x * inv_bandwidth)**2).sum(-1)
+    if exp >= 2:
+        if check_if_mat(inv_bandwidth):
+            return ((x @ inv_bandwidth)**exp).sum(-1)
+        else:  # Scalar case
+            return ((x * inv_bandwidth)**exp).sum(-1)
+    else: # absolute value
+        if check_if_mat(inv_bandwidth):
+            return ((x @ inv_bandwidth).abs()).sum(-1)
+        else:  # Scalar case
+            return ((x * inv_bandwidth).abs()).sum(-1)
     

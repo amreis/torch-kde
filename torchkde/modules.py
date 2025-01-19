@@ -4,7 +4,7 @@ from torch import nn
 from .utils import ensure_two_dimensional, check_if_mat
 from .algorithms import RootTree, SUPPORTED_ALGORITHMS
 from .bandwidths import SUPPORTED_BANDWIDTHS, compute_bandwidth
-from .kernels import GaussianKernel, EpanechnikovKernel, SUPPORTED_KERNELS
+from .kernels import GaussianKernel, EpanechnikovKernel, ExponentialKernel, SUPPORTED_KERNELS
 
 
 ALG_DICT = {
@@ -14,7 +14,8 @@ ALG_DICT = {
 
 KERNEL_DICT = {
     "gaussian": GaussianKernel,
-    "epanechnikov": EpanechnikovKernel
+    "epanechnikov": EpanechnikovKernel,
+    "exponential": ExponentialKernel
 }
 
 
