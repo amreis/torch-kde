@@ -18,6 +18,8 @@ SUPPORTED_KERNELS = [
 class Kernel(ABC):
     def __init__(self):
         self._bandwidth = None
+        self._norm_constant = None
+        self.dim = None
 
     @property
     def bandwidth(self):
@@ -31,6 +33,17 @@ class Kernel(ABC):
             self.inv_bandwidth = inverse_sqrt(bandwidth)
         else:  # Scalar case
             self.inv_bandwidth = self.bandwidth**(-0.5)
+    
+    @property
+    def norm_constant(self):
+        if self._norm_constant is None:
+            assert self.dim is not None, "Dimension not set."
+            self._norm_constant = self._compute_norm_constant(self.dim)
+        return self._norm_constant
+
+    @abstractmethod
+    def _compute_norm_constant(self, dim):
+        pass
 
     @abstractmethod
     def __call__(self, x):
@@ -40,11 +53,12 @@ class Kernel(ABC):
 class GaussianKernel(Kernel):
     def __call__(self, x):
         super().__call__(x)
-        c = self._norm_constant(dim=x.shape[-1])
+        self.dim = x.shape[-1]
+        c = self.norm_constant
         u = kernel_input(self.inv_bandwidth, x)
         return c*torch.exp(-u/2)
 
-    def _norm_constant(self, dim):
+    def _compute_norm_constant(self, dim):
         # normalizing constant for the Gaussian kernel
         return 1/(2*math.pi)**(dim/2)
 
@@ -59,11 +73,12 @@ class TopHatKernel(Kernel):
 
     def __call__(self, x):
         super().__call__(x)
-        c = self._norm_constant(dim=x.shape[-1])
+        self.dim = x.shape[-1]
+        c = self.norm_constant
         u = kernel_input(self.inv_bandwidth, x)
         return c*torch.exp(-(u**self.beta)/2)
 
-    def _norm_constant(self, dim):
+    def _compute_norm_constant(self, dim):
         # normalizing constant for the Gaussian kernel
         # reference: https://arxiv.org/pdf/1302.6498
         return (self.beta*gamma(dim/2))/(math.pi**(dim/2) * \
@@ -73,11 +88,12 @@ class TopHatKernel(Kernel):
 class EpanechnikovKernel(Kernel):
     def __call__(self, x):
         super().__call__(x)
-        c = self._norm_constant(dim=x.shape[-1])
+        self.dim = x.shape[-1]
+        c = self.norm_constant
         u = kernel_input(self.inv_bandwidth, x)
         return torch.where(u > 1, 0, c * (1 - u))
     
-    def _norm_constant(self, dim):
+    def _compute_norm_constant(self, dim):
         # normalizing constant for the Epanechnikov
         return ((dim + 2)*gamma(dim/2 + 1))/(2*math.pi**(dim/2))
 
@@ -85,11 +101,12 @@ class EpanechnikovKernel(Kernel):
 class ExponentialKernel(Kernel):
     def __call__(self, x):
         super().__call__(x)
-        c = self._norm_constant(dim=x.shape[-1])
+        self.dim = x.shape[-1]
+        c = self.norm_constant
         u = kernel_input(self.inv_bandwidth, x, exp=1)
         return c*torch.exp(-u)
     
-    def _norm_constant(self, dim):
+    def _compute_norm_constant(self, dim):
         # normalizing constant for the exponential kernel
         return 1/(2**dim)
     
