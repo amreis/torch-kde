@@ -10,7 +10,8 @@ from torchkde.utils import check_if_mat, inverse_sqrt
 SUPPORTED_KERNELS = [
     "gaussian",
     "epanechnikov",
-    "exponential"
+    "exponential",
+    "tophat-approx"
 ]
 
 
@@ -46,6 +47,27 @@ class GaussianKernel(Kernel):
     def _norm_constant(self, dim):
         # normalizing constant for the Gaussian kernel
         return 1/(2*math.pi)**(dim/2)
+
+
+class TopHatKernel(Kernel):
+    """Differentiable approximation of the top-hat kernel 
+    via a generalized Gaussian."""
+    def __init__(self, beta=8):
+        super().__init__()
+        assert type(beta) == int, "beta must be an integer."
+        self.beta = beta
+
+    def __call__(self, x):
+        super().__call__(x)
+        c = self._norm_constant(dim=x.shape[-1])
+        u = kernel_input(self.inv_bandwidth, x)
+        return c*torch.exp(-(u**self.beta)/2)
+
+    def _norm_constant(self, dim):
+        # normalizing constant for the Gaussian kernel
+        # reference: https://arxiv.org/pdf/1302.6498
+        return (self.beta*gamma(dim/2))/(math.pi**(dim/2) * \
+                                         gamma(dim/(2*self.beta)) * 2**(dim/(2*self.beta)))
 
 
 class EpanechnikovKernel(Kernel):

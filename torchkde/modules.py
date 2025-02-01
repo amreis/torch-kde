@@ -4,7 +4,11 @@ from torch import nn
 from .utils import ensure_two_dimensional, check_if_mat
 from .algorithms import RootTree, SUPPORTED_ALGORITHMS
 from .bandwidths import SUPPORTED_BANDWIDTHS, compute_bandwidth
-from .kernels import GaussianKernel, EpanechnikovKernel, ExponentialKernel, SUPPORTED_KERNELS
+from .kernels import (GaussianKernel, 
+                      EpanechnikovKernel, 
+                      ExponentialKernel, 
+                      TopHatKernel, 
+                      SUPPORTED_KERNELS)
 
 
 ALG_DICT = {
@@ -15,7 +19,8 @@ ALG_DICT = {
 KERNEL_DICT = {
     "gaussian": GaussianKernel,
     "epanechnikov": EpanechnikovKernel,
-    "exponential": ExponentialKernel
+    "exponential": ExponentialKernel,
+    "tophat-approx": TopHatKernel
 }
 
 
@@ -28,11 +33,14 @@ class KernelDensity(nn.Module):
         *,
         bandwidth=1.0,
         algorithm="standard",
-        kernel="gaussian"
+        kernel="gaussian",
+        kernel_kwargs=None
     ):
         self.bandwidth = bandwidth
         self.kernel = kernel
-        self.kernel_module = KERNEL_DICT[kernel]()
+        if kernel_kwargs is None:
+            kernel_kwargs = {}
+        self.kernel_module = KERNEL_DICT[kernel](**kernel_kwargs)
         self.algorithm = algorithm
         self.is_fitted = False
         self.n_samples = None

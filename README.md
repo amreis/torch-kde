@@ -51,6 +51,20 @@ You may also check out `demo_kde.ipynb` for a simple demo on the [Bart Simpson d
 <img src="/plots/bart_simpson_kde.svg" width="500">
 </p>
 
+### Tophat Kernel Approximation
+
+The Tophat kernel is not differentiable at two points and has zero derivative everywhere else. Thus, we provide a differentiable approximation via a generalized Gaussian (see e.g. [Pascal et al.](https://arxiv.org/pdf/1302.6498) for reference):
+
+$$K^{\text{tophat}}(x; \; \beta) = \frac{\beta \Gamma(\frac{p}{2})}{\pi^{\frac{p}{2}} \Gamma(\frac{p}{2\beta}) 2^{\frac{p}{2\beta}}} \; \text{exp} \left( - \| x \|_2^{2\beta} / 2 \right),$$
+
+where $p$ is the dimensionality of $x$. Based on this kernel, we can approximate the Tophat kernel for large values of $\beta$, as shown in the following 1-dimensional example:
+
+<p align="center">
+<img src="/plots/tophat_approx.svg" width="500">
+</p>
+
+We note that for $\beta = 1$, this approximation corresponds to a Gaussian kernel. Also, while the approximation becomes better for large values of $\beta$, its gradients with respect to the input also become larger. This is a tradeoff that must be balanced when using this kernel.
+
 ## Supported Settings
 
 The current implementation provides the following functionality:
@@ -59,7 +73,7 @@ The current implementation provides the following functionality:
 
 | Feature                  | Supported Values            |
 |--------------------------|-----------------------------|
-| Kernels                  | Gaussian, Epanechnikov, Exponential      |
+| Kernels                  | Gaussian, Epanechnikov, Exponential, Tophat Approximation      |
 | Tree Algorithms          | Standard                    |
 | Bandwidths               | Float (Isotropic bandwidth matrix), Scott, Silverman |
 

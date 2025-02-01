@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 SUPPORTED_ALGORITHMS = [
     "standard"
-    #TODO: Add algorithms like KDTree and BallTree
 ]
 
 
@@ -25,6 +24,5 @@ class RootTree(Tree):
 
     def query(self, x, return_distance=False):
         assert return_distance == False, "Distance computation is not supported."
-        # TODO: Implement return_distance
         return self.data
     
