@@ -16,8 +16,10 @@ from torchkde.bandwidths import SUPPORTED_BANDWIDTHS
 BANDWIDTHS = [1.0, 5.0] + SUPPORTED_BANDWIDTHS
 DIMS = [1, 2]
 TOLERANCE = 1e-1
+WEIGHTS = [False, True]
 
-N = 100
+N1 = 100
+N2 = 10
 GRID_N = 1000
 GRID_RG = 100
 
@@ -32,11 +34,15 @@ class KdeTestCase(unittest.TestCase):
 
     def test_integral(self):
         """Test that the kernel density estimator integrates to 1."""
-        for kernel_str, bandwidth, dim in product(SUPPORTED_KERNELS, BANDWIDTHS, DIMS):
-            X = sample_from_gaussian(dim, N)
+        for kernel_str, bandwidth, dim, weights in product(SUPPORTED_KERNELS, BANDWIDTHS, DIMS, WEIGHTS):
+            X = sample_from_gaussian(dim, N1)
             # Fit a kernel density estimator to the data
             kde = KernelDensity(bandwidth=bandwidth, kernel=kernel_str)
-            kde.fit(X)
+            if weights:
+                weights = torch.rand((N1,)).exp()
+                _ = kde.fit(X, sample_weight=weights)
+            else:
+                _ = kde.fit(X)
             # assess whether the kernel integrates to 1
             # evaluate the kernel density estimator at a grid of 2D points
             # Create ranges for each dimension
@@ -62,8 +68,8 @@ class KdeTestCase(unittest.TestCase):
                 _ = kde.fit(X)
                 return kde.score_samples(X_new)
             
-            X = sample_from_gaussian(dim, N).to(torch.float64) # somehow relevant to the gradient check to convert to double
-            X_new = sample_from_gaussian(dim, N).to(torch.float64)
+            X = sample_from_gaussian(dim, N1).to(torch.float64) # somehow relevant to the gradient check to convert to double
+            X_new = sample_from_gaussian(dim, N2).to(torch.float64)
             bandwidth = bandwidth.to(torch.float64)
 
             X.requires_grad = True

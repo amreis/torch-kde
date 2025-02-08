@@ -24,5 +24,5 @@ class RootTree(Tree):
 
     def query(self, x, return_distance=False):
         assert return_distance == False, "Distance computation is not supported."
-        return self.data
+        return self.data.unsqueeze(0).repeat(x.shape[0], 1, 1)
     
