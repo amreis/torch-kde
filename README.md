@@ -11,13 +11,13 @@ $$\hat{f}(x) = \frac{1}{|H|^{\frac{1}{2}} n} \sum_{i=1}^n K \left( H^{-\frac{1}{
 
 ## Installation Instructions
 
-Clone the repository, `cd` into the root directory and run
+The torch-kde package can be installed via `pip`. Run
 
 ```bash
-pip install .
+pip install torch-kde
 ```
 
-Now you are ready to go! If you would also like to run the code in the Jupyter notebooks or contribute to this package, please also install the packages in the `requirements.txt` (inside of an environment):
+Now you are ready to go! If you would also like to run the code from the Jupyter notebooks or contribute to this package, please also install the packages in the `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
