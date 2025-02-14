@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "torch-kde"
 version = "0.1.0"
 description = "A differentiable implementation of kernel density estimation in PyTorch"
-readme = "README.md"
+readme = "README_PyPI.md"
 license = { text = "MIT" }
 authors = [
     { name = "Klaus-Rudolf Kladny", email = "kkladny@tuebingen.mpg.de" }
