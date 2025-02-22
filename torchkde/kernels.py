@@ -4,7 +4,7 @@ import math
 import torch
 from scipy.special import gamma
 
-from torchkde.utils import check_if_mat, inverse_sqrt
+from .utils import check_if_mat, inverse_sqrt
 
 
 SUPPORTED_KERNELS = [
