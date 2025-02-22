@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "torch-kde"
-version = "0.1.1"
+version = "0.1.3"
 description = "A differentiable implementation of kernel density estimation in PyTorch"
 readme = "README_PyPI.md"
 license = { text = "MIT" }
