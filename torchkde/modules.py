@@ -115,7 +115,7 @@ class KernelDensity(nn.Module):
 
         return self
 
-    def score_samples(self, X: torch.Tensor) -> torch.Tensor:
+    def score_samples(self, X: torch.Tensor, batch_size: int = 128) -> torch.Tensor:
         """Compute the log-likelihood of each sample under the model.
 
         Parameters
@@ -123,6 +123,9 @@ class KernelDensity(nn.Module):
         X : torch Tensor of shape (n_samples, n_features)
             An array of points to query.  Last dimension should match dimension
             of training data (n_features).
+        batch_size : int, default=64
+            Number of samples to process in each batch.
+
         Returns
         -------
         density : torch Tensor of shape (n_samples,)
@@ -131,16 +134,19 @@ class KernelDensity(nn.Module):
             data.
         """
         assert self.is_fitted, "Model must be fitted before scoring samples."
-   
-        X_neighbors = self.tree_.query(X, return_distance=False)
+        
+        n_samples = X.shape[0]
         # Compute log-density estimation with a kernel function
         log_density = []
         # Compute normalization part from bandwidth matrix
         bw_norm = torch.sqrt(torch.det(self.bandwidth)) if check_if_mat(self.bandwidth) else self.bandwidth**(self.n_features/2)
         # looping to avoid memory issues
-        for i, x in enumerate(X):
+        for start in range(0, n_samples, batch_size):
+            end = min(start + batch_size, n_samples)
+            X_batch = X[start:end]
+            X_neighbors = self.tree_.query(X_batch, return_distance=False)
             # Compute pairwise differences between the current point and neighbors
-            differences = x - X_neighbors[i]
+            differences = X_batch.unsqueeze(1) - X_neighbors
             # Apply the kernel function to each difference
             kernel_values = self.kernel_module(differences)
             # Sum kernel values and normalize
@@ -149,7 +155,8 @@ class KernelDensity(nn.Module):
             log_density.append(density.log())
 
         # Convert the list of log-density values into a tensor
-        log_density = torch.stack(log_density, dim=0)
+        log_density = torch.cat(log_density, dim=0)
+
         return log_density
 
 
@@ -195,5 +202,4 @@ class KernelDensity(nn.Module):
         X = self.bandwidth * torch.randn(n_samples, data.shape[1]) + data[idxs]
 
         return ensure_two_dimensional(X)
-    
     
