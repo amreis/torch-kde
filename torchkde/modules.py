@@ -1,3 +1,4 @@
+from typing import Optional, Union
 import torch
 from torch import nn
 
@@ -31,11 +32,24 @@ class KernelDensity(nn.Module):
     def __init__(
         self,
         *,
-        bandwidth=1.0,
-        algorithm="standard",
-        kernel="gaussian",
-        kernel_kwargs=None
-    ):
+        bandwidth: Union[float, str] = 1.0,
+        algorithm: str = "standard",
+        kernel: str = "gaussian",
+        kernel_kwargs: dict = None
+    ) -> None:
+        """Initialize the KernelDensity estimator.
+
+        Parameters
+        ----------
+        bandwidth : float or str, default=1.0
+            The bandwidth of the kernel.
+        algorithm : str, default="standard"
+            The algorithm to use for kernel density estimation.
+        kernel : str, default="gaussian"
+            The kernel to use for density estimation.
+        kernel_kwargs : dict, optional
+            Additional keyword arguments for the kernel.
+        """
         if not isinstance(bandwidth, str):
             assert bandwidth > 0, "Bandwidth must be positive."
             self.bandwidth = bandwidth**2 # square the bandwidth to match sklearn's implementation
@@ -63,7 +77,10 @@ class KernelDensity(nn.Module):
             raise ValueError(f"Bandwidth {bandwidth} not supported")
 
 
-    def fit(self, X, sample_weight=None):
+    def fit(self, 
+            X: torch.Tensor, 
+            sample_weight: Optional[torch.Tensor] = None
+            ) -> 'KernelDensity':
         """Fit the Kernel Density model on the data.
 
         Parameters
@@ -98,7 +115,7 @@ class KernelDensity(nn.Module):
 
         return self
 
-    def score_samples(self, X):
+    def score_samples(self, X: torch.Tensor) -> torch.Tensor:
         """Compute the log-likelihood of each sample under the model.
 
         Parameters
@@ -136,7 +153,7 @@ class KernelDensity(nn.Module):
         return log_density
 
 
-    def score(self, X):
+    def score(self, X: torch.Tensor) -> float:
         """Compute the total log-likelihood under the model.
 
         Parameters
@@ -154,7 +171,7 @@ class KernelDensity(nn.Module):
         """
         return self.score_samples(X).sum()
 
-    def sample(self, n_samples=1):
+    def sample(self, n_samples: int = 1) -> torch.Tensor:
         """Generate random samples from the model.
 
         Parameters
@@ -178,4 +195,5 @@ class KernelDensity(nn.Module):
         X = self.bandwidth * torch.randn(n_samples, data.shape[1]) + data[idxs]
 
         return ensure_two_dimensional(X)
+    
     
