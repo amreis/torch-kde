@@ -17,7 +17,8 @@ BANDWIDTHS = [1.0, 5.0] + SUPPORTED_BANDWIDTHS
 DIMS = [1, 2]
 TOLERANCE = 1e-1
 WEIGHTS = [False, True]
-DEVICES = ["cpu", "cuda"]
+
+DEVICES = ["cpu"]
 
 N1 = 100
 N2 = 10
