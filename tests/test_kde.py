@@ -17,6 +17,7 @@ BANDWIDTHS = [1.0, 5.0] + SUPPORTED_BANDWIDTHS
 DIMS = [1, 2]
 TOLERANCE = 1e-1
 WEIGHTS = [False, True]
+DEVICES = ["cpu", "cuda"]
 
 N1 = 100
 N2 = 10
@@ -34,12 +35,12 @@ class KdeTestCase(unittest.TestCase):
 
     def test_integral(self):
         """Test that the kernel density estimator integrates to 1."""
-        for kernel_str, bandwidth, dim, weights in product(SUPPORTED_KERNELS, BANDWIDTHS, DIMS, WEIGHTS):
-            X = sample_from_gaussian(dim, N1)
+        for kernel_str, bandwidth, dim, weights, device in product(SUPPORTED_KERNELS, BANDWIDTHS, DIMS, WEIGHTS, DEVICES):
+            X = sample_from_gaussian(dim, N1).to(device=device)
             # Fit a kernel density estimator to the data
             kde = KernelDensity(bandwidth=bandwidth, kernel=kernel_str)
             if weights:
-                weights = torch.rand((N1,)).exp()
+                weights = torch.rand((N1,)).exp().to(device=device)
                 _ = kde.fit(X, sample_weight=weights)
             else:
                 _ = kde.fit(X)
@@ -51,7 +52,7 @@ class KdeTestCase(unittest.TestCase):
             meshgrid = torch.meshgrid(*ranges, indexing='ij')  # 'ij' indexing for Cartesian coordinates
 
             # Convert meshgrid to a single tensor of shape (n_points, d)
-            grid_points = torch.stack(meshgrid, dim=-1).reshape(-1, dim)
+            grid_points = torch.stack(meshgrid, dim=-1).to(device=device).reshape(-1, dim)
             probs = kde.score_samples(grid_points).exp()
             delta = (GRID_RG * 2) / GRID_N
             integral = probs.sum() * (delta**dim)
