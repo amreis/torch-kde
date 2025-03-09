@@ -77,6 +77,7 @@ The current implementation provides the following functionality:
 | Kernels                  | Gaussian, Epanechnikov, Exponential, Tophat Approximation      |
 | Tree Algorithms          | Standard                    |
 | Bandwidths               | Float (Isotropic bandwidth matrix), Scott, Silverman |
+| Devices | CPU, GPU |
 
 </div>
 
