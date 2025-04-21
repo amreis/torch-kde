@@ -20,6 +20,8 @@ DIMS = [1, 2]
 TOLERANCE = 1e-1
 WEIGHTS = [False, True]
 
+DEVICES = ["cpu"]
+
 N1 = 100
 N2 = 10
 GRID_N = 1000

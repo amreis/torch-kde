@@ -66,6 +66,7 @@ class KernelDensity(nn.Module):
         self.algorithm = algorithm
         self.is_fitted = False
         self.n_samples = None
+        self.device = None
         self.n_features = None
         self.data = None
 
@@ -106,14 +107,17 @@ class KernelDensity(nn.Module):
         self.tree_.build(X)
         self.bandwidth = compute_bandwidth(X, self.bandwidth)
         self.kernel_module.bandwidth = self.bandwidth
+        self.device = X.device
         if sample_weight is None:
-            self.sample_weight = torch.ones(self.n_samples)
+            self.sample_weight = torch.ones(self.n_samples).to(self.device)
         else:
             assert sample_weight.shape[0] == self.n_samples, "Sample weights must have the same length as the data."
+            assert sample_weight.device == self.device, "Sample weights must be on the same device as the data."
             assert sample_weight.dim() == 1, "Sample weights must be one-dimensional."
             assert sample_weight.min() >= 0, "Sample weights must be non-negative."
             self.sample_weight = sample_weight
         self.is_fitted = True
+        self.device = X.device
 
         return self
 
@@ -136,6 +140,7 @@ class KernelDensity(nn.Module):
             data.
         """
         assert self.is_fitted, "Model must be fitted before scoring samples."
+        assert X.device == self.device, "Device of the query data must be on the same device as the data for fitting the estimator."
         
         n_samples = X.shape[0]
         # Compute log-density estimation with a kernel function
