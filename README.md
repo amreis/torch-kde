@@ -18,13 +18,13 @@ The torch-kde package can be installed via `pip`. Run
 pip install torch-kde
 ```
 
-Now you are ready to go! If you would also like to run the code from the Jupyter notebooks or contribute to this package, please also install the packages in the `requirements.txt`:
+Now you are ready to go. If you would also like to run the code from the Jupyter notebooks or contribute to this package, please also install the packages in the `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## What's included?
+## What is included?
 
 ### Kernel Density Estimation
 
@@ -74,13 +74,13 @@ The current implementation provides the following functionality:
 
 | Feature                  | Supported Values            |
 |--------------------------|-----------------------------|
-| Kernels                  | Gaussian, Epanechnikov, Exponential, Tophat Approximation      |
+| Kernels                  | Gaussian, Epanechnikov, Exponential, Tophat Approximation, von Mises-Fisher (data must lie on the unit sphere) |
 | Tree Algorithms          | Standard                    |
 | Bandwidths               | Float (Isotropic bandwidth matrix), Scott, Silverman |
 
 </div>
 
-## Got an Extension? Create a Pull Request!
+## Would You like to Contribute? Create a Pull Request!
 
 In case you do not know how to do that, here are the necessary steps:
 

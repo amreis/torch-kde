@@ -9,6 +9,7 @@ from .kernels import (GaussianKernel,
                       EpanechnikovKernel, 
                       ExponentialKernel, 
                       TopHatKernel, 
+                      VonMisesFisherKernel,
                       SUPPORTED_KERNELS)
 
 
@@ -21,7 +22,8 @@ KERNEL_DICT = {
     "gaussian": GaussianKernel,
     "epanechnikov": EpanechnikovKernel,
     "exponential": ExponentialKernel,
-    "tophat-approx": TopHatKernel
+    "tophat-approx": TopHatKernel,
+    "von-mises-fisher": VonMisesFisherKernel
 }
 
 
@@ -123,7 +125,7 @@ class KernelDensity(nn.Module):
         X : torch Tensor of shape (n_samples, n_features)
             An array of points to query.  Last dimension should match dimension
             of training data (n_features).
-        batch_size : int, default=64
+        batch_size : int, default=128
             Number of samples to process in each batch.
 
         Returns
@@ -138,19 +140,16 @@ class KernelDensity(nn.Module):
         n_samples = X.shape[0]
         # Compute log-density estimation with a kernel function
         log_density = []
-        # Compute normalization part from bandwidth matrix
-        bw_norm = torch.sqrt(torch.det(self.bandwidth)) if check_if_mat(self.bandwidth) else self.bandwidth**(self.n_features/2)
         # looping to avoid memory issues
         for start in range(0, n_samples, batch_size):
             end = min(start + batch_size, n_samples)
             X_batch = X[start:end]
             X_neighbors = self.tree_.query(X_batch, return_distance=False)
-            # Compute pairwise differences between the current point and neighbors
-            differences = X_batch.unsqueeze(1) - X_neighbors
-            # Apply the kernel function to each difference
-            kernel_values = self.kernel_module(differences)
+            # Apply the kernel function to each pair of points
+            kernel_values = self.kernel_module(X_batch.unsqueeze(1), X_neighbors)
             # Sum kernel values and normalize
-            density = (self.sample_weight * kernel_values).sum(-1) / (bw_norm * self.sample_weight.sum())
+            density = ((self.sample_weight * kernel_values).sum(-1) * self.kernel_module.norm_constant) \
+                        / self.sample_weight.sum()
             # Compute the log-density
             log_density.append(density.log())
 
