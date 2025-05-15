@@ -201,7 +201,8 @@ class KernelDensity(nn.Module):
             raise NotImplementedError()
 
         data = torch.tensor(self.tree_.data)
-        idxs = torch.randint(data.shape[0], (n_samples,))
+        # idxs = torch.randint(data.shape[0], (n_samples,))
+        idxs = torch.distributions.Categorical(probs=self.sample_weight).sample((n_samples,))
 
         X = self.bandwidth * torch.randn(n_samples, data.shape[1]) + data[idxs]
 
