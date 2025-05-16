@@ -7,10 +7,12 @@ import random
 import unittest
 
 import torch
+from torch import distributions as dist
 import numpy as np
 from scipy.special import gamma
 from torch.autograd import gradcheck
 
+import torchkde
 from torchkde.kernels import *
 from torchkde.modules import KernelDensity
 from torchkde.bandwidths import SUPPORTED_BANDWIDTHS
@@ -142,6 +144,54 @@ class TestKDE(unittest.TestCase):
             fnc = partial(fit_and_eval, X=X, bandwidth=bandwidth)
             self.assertTrue(gradcheck(lambda X_new_: fnc(X_new=X_new_), (X_new,), raise_exception=False, eps=eps), 
                             f"""Kernel {kernel_str}, for dimensionality {str(dim)} is not differentiable w.r.t evaluation data.""")
+
+    def test_sampling_adheres_to_weights(self,):
+        # test if the sample_weights passed in fit(X, sample_weights=...) are respected on sampling
+        n_samples=2000
+        
+        # create a GMM with 2 components with weights pi
+        pi = torch.tensor([0.9, 0.05]) # 90 % for component 1, 0.5 % for component 2 (does not need to sum to 1)
+        loc1 = torch.tensor([10.,10])
+        cov1 = torch.diag(torch.tensor([1.,1]))
+        loc2 = torch.tensor([0.,0])
+        cov2 = torch.diag(torch.tensor([1.,1]))
+        weights1 = torch.ones((n_samples,))*pi[0]
+        weights2 = torch.ones((n_samples,))*pi[1]
+
+        locs = torch.stack([loc1, loc2]) # Shape: [n_components, event_shape] = [2, 2]
+        covs = torch.stack([cov1, cov2]) # Shape: [n_components, event_shape, event_shape] = [2, 2, 2]
+
+        component_distribution = dist.multivariate_normal.MultivariateNormal(
+            loc=locs,
+            covariance_matrix=covs
+        )
+
+        # 2. Create the mixing distribution (Categorical)
+        # pi is interpreted as weights in linear-scale
+        mixing_distribution = dist.Categorical(probs=pi)
+
+        # 3. Create the MixtureSameFamily distribution
+        # This combines the mixing and component distributions
+        gmm = dist.MixtureSameFamily(
+            mixture_distribution=mixing_distribution,
+            component_distribution=component_distribution
+        )
+
+
+        X = component_distribution.sample((n_samples,))
+        X1 = X[:,0,:]
+        X2 = X[:,1,:]
+
+        kde = torchkde.KernelDensity(bandwidth=.5, kernel='gaussian') # create kde object with isotropic bandwidth matrix
+        kde.fit(torch.concat((X1, X2), dim=0), sample_weight=torch.concat((weights1, weights2), dim=0)) # fit kde to weighted data
+
+        samples_from_kde = kde.sample(n_samples)
+        samples_from_gmm = gmm.sample((n_samples,))
+
+        component_1_fraction_kde = torch.count_nonzero(torch.where(samples_from_kde[:,0] > 5., 1.0, 0.0)) / n_samples
+        component_1_fraction_gmm = torch.count_nonzero(torch.where(samples_from_gmm[:,0] > 5., 1.0, 0.0)) / n_samples
+        print(component_1_fraction_kde / component_1_fraction_gmm)
+        self.assertTrue(0.9 < (component_1_fraction_kde / component_1_fraction_gmm) < 1.1, "Component weights must be considered on sampling.")
             
 
 def sample_from_gaussian(dim, N):
