@@ -26,8 +26,18 @@ DEVICES = ["cpu"]
 
 N1 = 100
 N2 = 10
+N3 = 1000
+
 GRID_N = 1000
 GRID_RG = 100
+
+# parameters to test whether sampling adheres to weights
+COMPONENT_WEIGHTS = [0.9, 0.05]
+LOC1 = [10.0, 10.0]
+LOC2 = [0.0, 0.0]
+COV1 = [1.0, 1.0]
+COV2 = [1.0, 1.0]
+THRESHOLD = 5.0
 
 
 class TestKDE(unittest.TestCase):
@@ -147,16 +157,15 @@ class TestKDE(unittest.TestCase):
 
     def test_sampling_adheres_to_weights(self,):
         # test if the sample_weights passed in fit(X, sample_weights=...) are respected on sampling
-        n_samples=2000
-        
         # create a GMM with 2 components with weights pi
-        pi = torch.tensor([0.9, 0.05]) # 90 % for component 1, 0.5 % for component 2 (does not need to sum to 1)
-        loc1 = torch.tensor([10.,10])
-        cov1 = torch.diag(torch.tensor([1.,1]))
-        loc2 = torch.tensor([0.,0])
-        cov2 = torch.diag(torch.tensor([1.,1]))
-        weights1 = torch.ones((n_samples,))*pi[0]
-        weights2 = torch.ones((n_samples,))*pi[1]
+        pi = torch.tensor(COMPONENT_WEIGHTS) # 90 % for component 1, 0.5 % for component 2 (does not need to sum to 1)
+        loc1 = torch.tensor(LOC1)
+        cov1 = torch.diag(torch.tensor(COV1))
+        loc2 = torch.tensor(LOC2)
+        cov2 = torch.diag(torch.tensor(COV2))
+
+        weights1 = torch.ones((N3,))*pi[0]
+        weights2 = torch.ones((N3,))*pi[1]
 
         locs = torch.stack([loc1, loc2]) # Shape: [n_components, event_shape] = [2, 2]
         covs = torch.stack([cov1, cov2]) # Shape: [n_components, event_shape, event_shape] = [2, 2, 2]
@@ -166,11 +175,11 @@ class TestKDE(unittest.TestCase):
             covariance_matrix=covs
         )
 
-        # 2. Create the mixing distribution (Categorical)
+        # Create the mixing distribution (Categorical)
         # pi is interpreted as weights in linear-scale
         mixing_distribution = dist.Categorical(probs=pi)
 
-        # 3. Create the MixtureSameFamily distribution
+        # Create the MixtureSameFamily distribution
         # This combines the mixing and component distributions
         gmm = dist.MixtureSameFamily(
             mixture_distribution=mixing_distribution,
@@ -178,20 +187,20 @@ class TestKDE(unittest.TestCase):
         )
 
 
-        X = component_distribution.sample((n_samples,))
+        X = component_distribution.sample((N3,))
         X1 = X[:,0,:]
         X2 = X[:,1,:]
 
         kde = torchkde.KernelDensity(bandwidth=.5, kernel='gaussian') # create kde object with isotropic bandwidth matrix
         kde.fit(torch.concat((X1, X2), dim=0), sample_weight=torch.concat((weights1, weights2), dim=0)) # fit kde to weighted data
 
-        samples_from_kde = kde.sample(n_samples)
-        samples_from_gmm = gmm.sample((n_samples,))
+        samples_from_kde = kde.sample(N1)
+        samples_from_gmm = gmm.sample((N1,))
 
-        component_1_fraction_kde = torch.count_nonzero(torch.where(samples_from_kde[:,0] > 5., 1.0, 0.0)) / n_samples
-        component_1_fraction_gmm = torch.count_nonzero(torch.where(samples_from_gmm[:,0] > 5., 1.0, 0.0)) / n_samples
-        print(component_1_fraction_kde / component_1_fraction_gmm)
-        self.assertTrue(0.9 < (component_1_fraction_kde / component_1_fraction_gmm) < 1.1, "Component weights must be considered on sampling.")
+        component_1_fraction_kde = torch.count_nonzero(torch.where(samples_from_kde[:,0] > THRESHOLD, 1.0, 0.0)) / N3
+        component_1_fraction_gmm = torch.count_nonzero(torch.where(samples_from_gmm[:,0] > THRESHOLD, 1.0, 0.0)) / N3
+
+        self.assertTrue(1.0 - TOLERANCE < (component_1_fraction_kde / component_1_fraction_gmm) < 1.0 + TOLERANCE, "Component weights must be considered on sampling.")
             
 
 def sample_from_gaussian(dim, N):
