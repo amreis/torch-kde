@@ -171,6 +171,7 @@ class VonMisesFisherKernel(Kernel):
         if type(bandwidth) == torch.Tensor:
             assert bandwidth.requires_grad == False, \
                 "The bandwidth for the von Mises-Fisher kernel must not require gradients."
+            bandwidth = bandwidth.item()
         assert type(bandwidth) == float or isinstance(bandwidth, torch.Tensor) and bandwidth.dim() == 0, \
             "The bandwidth for the von Mises-Fisher kernel must be a scalar."
         self._bandwidth = bandwidth
