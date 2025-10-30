@@ -18,13 +18,13 @@ def compute_bandwidth(X, bandwidth):
            Analysis", Vol. 26, Monographs on Statistics and Applied Probability,
            Chapman and Hall, London, 1986.
     """
-    if type(bandwidth) == float or isinstance(bandwidth, torch.Tensor) and bandwidth.dim() <= 1:
+    if isinstance(bandwidth, float) or isinstance(bandwidth, torch.Tensor) and bandwidth.dim() <= 1:
         bandwidth_ = bandwidth
-    elif type(bandwidth) == str:
+    elif isinstance(bandwidth, str):
         cov = torch.cov(X.T)
         if bandwidth == "scott":
-            bandwidth_ = cov * X.shape[0]**(-1./(X.shape[1]+4))
-        else: # silverman
-            bandwidth_ = cov * (X.shape[0]*((X.shape[1] + 2)/4.))**(-1./(X.shape[1]+4))
-    
+            bandwidth_ = cov * X.shape[0] ** (-1.0 / (X.shape[1] + 4))
+        else:  # silverman
+            bandwidth_ = cov * (X.shape[0] * ((X.shape[1] + 2) / 4.0)) ** (-1.0 / (X.shape[1] + 4))
+
     return bandwidth_

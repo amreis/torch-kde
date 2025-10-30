@@ -19,17 +19,17 @@ def check_if_mat(matrix_or_scalar):
 def inverse_sqrt(X):
     """
     Compute the inverse square root of a positive definite matrix X using eigenvalue decomposition.
-    
+
     Parameters:
     - X: (n, n) torch.Tensor, positive definite matrix.
-    
+
     Returns:
     - X_inv_sqrt: (n, n) torch.Tensor, the inverse square root of X.
     """
     # Compute the eigenvalues and eigenvectors of the matrix
-    eigvals, eigvecs = torch.linalg.eigh(X, UPLO='U')
+    eigvals, eigvecs = torch.linalg.eigh(X, UPLO="U")
     # Compute the inverse square root of the eigenvalues
-    eigvals_inv_sqrt = 1. / torch.sqrt(eigvals)
+    eigvals_inv_sqrt = 1.0 / torch.sqrt(eigvals)
     # Reconstruct the inverse square root of the matrix
     X_inv_sqrt = eigvecs @ torch.diag(eigvals_inv_sqrt) @ eigvecs.t()
 

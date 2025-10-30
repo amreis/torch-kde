@@ -5,17 +5,17 @@ from torch import nn
 from .utils import ensure_two_dimensional, check_if_mat
 from .algorithms import RootTree, SUPPORTED_ALGORITHMS
 from .bandwidths import SUPPORTED_BANDWIDTHS, compute_bandwidth
-from .kernels import (GaussianKernel,
-                      EpanechnikovKernel,
-                      ExponentialKernel,
-                      TopHatKernel,
-                      VonMisesFisherKernel,
-                      SUPPORTED_KERNELS)
+from .kernels import (
+    GaussianKernel,
+    EpanechnikovKernel,
+    ExponentialKernel,
+    TopHatKernel,
+    VonMisesFisherKernel,
+    SUPPORTED_KERNELS,
+)
 
 
-ALG_DICT = {
-    "standard": RootTree
-    }
+ALG_DICT = {"standard": RootTree}
 
 
 KERNEL_DICT = {
@@ -23,12 +23,12 @@ KERNEL_DICT = {
     "epanechnikov": EpanechnikovKernel,
     "exponential": ExponentialKernel,
     "tophat-approx": TopHatKernel,
-    "von-mises-fisher": VonMisesFisherKernel
+    "von-mises-fisher": VonMisesFisherKernel,
 }
 
 
 class KernelDensity(nn.Module):
-    """Analag to the KernelDensity class in sklearn.neighbors
+    """Analog to the KernelDensity class in sklearn.neighbors
     (see https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/neighbors/_kde.py)."""
 
     def __init__(
@@ -58,7 +58,7 @@ class KernelDensity(nn.Module):
         super().__init__()
         if not isinstance(bandwidth, str):
             assert bandwidth > 0, "Bandwidth must be positive."
-            self.bandwidth = bandwidth**2 # square the bandwidth to match sklearn's implementation
+            self.bandwidth = bandwidth**2  # square the bandwidth to match sklearn's implementation
         else:
             self.bandwidth = bandwidth
         assert kernel in SUPPORTED_KERNELS, f"Kernel {kernel} not supported."
@@ -81,14 +81,13 @@ class KernelDensity(nn.Module):
         if kernel not in SUPPORTED_KERNELS:
             raise ValueError(f"Kernel {kernel} not supported")
 
-        if not isinstance(bandwidth, (float, torch.Tensor)) and bandwidth not in SUPPORTED_BANDWIDTHS:
+        if (
+            not isinstance(bandwidth, (float, torch.Tensor))
+            and bandwidth not in SUPPORTED_BANDWIDTHS
+        ):
             raise ValueError(f"Bandwidth {bandwidth} not supported")
 
-
-    def fit(self,
-            X: torch.Tensor,
-            sample_weight: Optional[torch.Tensor] = None
-            ) -> 'KernelDensity':
+    def fit(self, X: torch.Tensor, sample_weight: Optional[torch.Tensor] = None) -> "KernelDensity":
         """Fit the Kernel Density model on the data.
 
         Parameters
@@ -116,8 +115,12 @@ class KernelDensity(nn.Module):
         if sample_weight is None:
             self.sample_weight = torch.ones(self.n_samples).to(self.device)
         else:
-            assert sample_weight.shape[0] == self.n_samples, "Sample weights must have the same length as the data."
-            assert sample_weight.device == self.device, "Sample weights must be on the same device as the data."
+            assert sample_weight.shape[0] == self.n_samples, (
+                "Sample weights must have the same length as the data."
+            )
+            assert sample_weight.device == self.device, (
+                "Sample weights must be on the same device as the data."
+            )
             assert sample_weight.dim() == 1, "Sample weights must be one-dimensional."
             assert sample_weight.min() >= 0, "Sample weights must be non-negative."
             self.sample_weight = sample_weight
@@ -145,7 +148,9 @@ class KernelDensity(nn.Module):
             data.
         """
         assert self.is_fitted, "Model must be fitted before scoring samples."
-        assert X.device == self.device, "Device of the query data must be on the same device as the data for fitting the estimator."
+        assert X.device == self.device, (
+            "Device of the query data must be on the same device as the data for fitting the estimator."
+        )
 
         n_samples = X.shape[0]
         # Compute log-density estimation with a kernel function
@@ -158,8 +163,9 @@ class KernelDensity(nn.Module):
             # Apply the kernel function to each pair of points
             kernel_values = self.kernel_module(X_batch.unsqueeze(1), X_neighbors)
             # Sum kernel values and normalize
-            density = ((self.sample_weight * kernel_values).sum(-1) * self.kernel_module.norm_constant) \
-                        / self.sample_weight.sum()
+            density = (
+                (self.sample_weight * kernel_values).sum(-1) * self.kernel_module.norm_constant
+            ) / self.sample_weight.sum()
             # Compute the log-density
             log_density.append(density.clamp(min=self.eps).log())
 
@@ -167,7 +173,6 @@ class KernelDensity(nn.Module):
         log_density = torch.cat(log_density, dim=0)
 
         return log_density
-
 
     def score(self, X: torch.Tensor) -> float:
         """Compute the total log-likelihood under the model.
