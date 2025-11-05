@@ -53,7 +53,7 @@ class KernelDensity(nn.Module):
         kernel_kwargs : dict, optional
             Additional keyword arguments for the kernel.
         eps: float, optional
-            Small positive number to add to clamp small log-densities for stability.
+            Small positive clamp for densities before log to avoid -inf.
         """
         super().__init__()
         if not isinstance(bandwidth, str):
